@@ -4,12 +4,14 @@ import socket, threading, time
 is_running = True
 
 class Client():
-    def __init__(self, host, port=8081):
-        self.host, self.port = host, port
+    def __init__(self, host, port=8081, name=input('What is your name ?')):
+        self.host, self.port, self.name = host, port, name
         self.conn = False
         self.last_message = ''
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.host, self.port))
+
+        self.outp(self.name)
 
         self.input_thread = threading.Thread(target=self.inp, daemon=True)
         self.input_thread.start()

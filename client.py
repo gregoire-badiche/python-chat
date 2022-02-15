@@ -4,7 +4,7 @@ import socket, threading, time
 is_running = True
 
 class Client():
-    def __init__(self, host, port=8081, name=input('What is your name ?')):
+    def __init__(self, host, name , port=8081):
         self.host, self.port, self.name = host, port, name
         self.conn = False
         self.last_message = ''
@@ -36,5 +36,5 @@ class Client():
             except KeyboardInterrupt:
                 is_running = False
 
-
-client = Client(host='127.0.0.1')
+if __name__ == '__main__':
+    client = Client(host='127.0.0.1', name=input('What is your name ?'))

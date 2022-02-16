@@ -4,9 +4,8 @@ import socket, threading, time
 is_running = True
 
 class Client():
-    def __init__(self, host, name , port=8081):
+    def __init__(self, name=input('Quel est votre pseudo'), host=input('Quel est l\'adressedu serveur auquel vous voulez-vous connecter?\n'), port=8081):
         self.host, self.port, self.name = host, port, name
-        self.conn = False
         self.last_message = ''
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.host, self.port))
@@ -37,4 +36,4 @@ class Client():
                 is_running = False
 
 if __name__ == '__main__':
-    client = Client(host='127.0.0.1', name=input('What is your name ?'))
+    client = Client()

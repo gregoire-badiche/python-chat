@@ -1,21 +1,27 @@
 import socket, threading, time
-from pynput.keyboard import Listener
+# from pynput.keyboard import Listener
 
 
 is_running = True
 
 class Server():
     
-    def __init__(self, host=socket.gethostname(), port=8081, name=input('What is your name ?')):
+    def __init__(self, host='undefined', port=8081, name=input('What is your name ?')):
 
         # Set up key press handler
 
         # self.listener = Listener(on_press=self.onkeypress, on_release=self.onkeyrelase)
         # self.listener.start()
 
-        self.host, self.port, self.name = host, port, name
+        self.port, self.name = port, name
         self.conns_list = []
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        if host == 'undefined':
+            self.host = self.conn.getsockname()[0]
+        else:
+            self.host = host
+        
         self.conn.bind((self.host, self.port))
         self.conn.listen(5)
 
@@ -23,6 +29,7 @@ class Server():
 
         self.new_conn_thread = threading.Thread(target=self.accept_new_conn, daemon=True)
         self.new_conn_thread.start()
+        print("Serveur démarré à l'adresse {}.".format(self.host))
         self.main()
     
     def accept_new_conn(self):
@@ -101,4 +108,5 @@ class ClientConnection():
     def outp(self, data):
         self.conn.sendall(bytes(data, 'UTF-8'))
 
-serv = Server(host='127.0.0.1')
+if __name__ == '__main__':
+    serv = Server()

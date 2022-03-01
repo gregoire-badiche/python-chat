@@ -1,38 +1,21 @@
 import socket, threading, time
-# from pynput.keyboard import Listener
+from pynput.keyboard import Listener
 
 
 is_running = True
 
-def get_ip():
-    st = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        st.connect(('10.255.255.255', 1))
-        IP = st.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        st.close()
-    return IP
-
 class Server():
     
-    def __init__(self, host='undefined', port=8081, name=input('What is your name ?')):
+    def __init__(self, host=socket.gethostname(), port=8081, name=input('What is your name ?')):
 
         # Set up key press handler
 
         # self.listener = Listener(on_press=self.onkeypress, on_release=self.onkeyrelase)
         # self.listener.start()
 
-        self.port, self.name = port, name
+        self.host, self.port, self.name = host, port, name
         self.conns_list = []
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        if host == 'undefined':
-            self.host = get_ip()
-        else:
-            self.host = host
-        
         self.conn.bind((self.host, self.port))
         self.conn.listen(5)
 
@@ -40,21 +23,19 @@ class Server():
 
         self.new_conn_thread = threading.Thread(target=self.accept_new_conn, daemon=True)
         self.new_conn_thread.start()
-        print("Serveur démarré à l'adresse {}.".format(self.host))
         self.main()
     
     def accept_new_conn(self):
         global is_running
         while is_running:
             client_socket, adrr = self.conn.accept()
-            print('New conn')
             self.conns_list.append(ClientConnection(client_socket, adrr, self.send_to_all))
     
     def send_to_all(self, msg):
         self.del_closed_conns()
         print(msg)
         for conn in self.conns_list:
-            conn.outp(msg)
+            conn.outp('\x12' + msg)
 
             # self.last_message = self.conn.recv(2048).decode('UTF-8')
             # print('Received', self.last_message)
@@ -78,7 +59,7 @@ class Server():
         while is_running:
             
             try:
-                time.sleep(1)
+                time.sleep(5)
                 self.del_closed_conns()
                 self.send_to_all(self.name + ' : ping')
 
@@ -93,7 +74,6 @@ class Server():
 
 class ClientConnection():
     def __init__(self, conn, adrr, send_to_all):
-        print('New conn')
         self.conn = conn
         self.adrr = adrr
 
@@ -119,5 +99,4 @@ class ClientConnection():
     def outp(self, data):
         self.conn.sendall(bytes(data, 'UTF-8'))
 
-if __name__ == '__main__':
-    serv = Server()
+serv = Server(host='127.0.0.1')

@@ -1,6 +1,4 @@
 import socket, threading, time
-from pynput.keyboard import Listener
-
 
 is_running = True
 
@@ -59,18 +57,13 @@ class Server():
         while is_running:
             
             try:
-                time.sleep(5)
+                time.sleep(0.1)
                 self.del_closed_conns()
                 self.send_to_all(self.name + ' : ping')
 
             except KeyboardInterrupt:
                 print('Bye')
                 is_running = False
-    
-    # def onkeypress(self, key):
-    #     self.key = key
-    # def onkeyrelase(self, *args):
-    #     self.key = ''
 
 class ClientConnection():
     def __init__(self, conn, adrr, send_to_all):

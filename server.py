@@ -1,3 +1,4 @@
+import json
 import socket, threading, time
 
 is_running = True
@@ -33,7 +34,7 @@ class Server():
         self.del_closed_conns()
         print(msg)
         for conn in self.conns_list:
-            conn.outp('\x12' + msg)
+            conn.outp('message', msg)
 
             # self.last_message = self.conn.recv(2048).decode('UTF-8')
             # print('Received', self.last_message)
@@ -43,8 +44,8 @@ class Server():
         names = []
         for i in range(len(self.conns_list)):
             try:
-                self.conns_list[i].outp('\x11')
-            except BrokenPipeError:
+                self.conns_list[i].outp('ping', '')
+            except:
                 to_del.append(i)
                 names.append(self.conns_list[i].name)
         for i in to_del:
@@ -55,9 +56,8 @@ class Server():
     def main(self):
         global is_running
         while is_running:
-            
             try:
-                time.sleep(0.1)
+                time.sleep(5)
                 self.del_closed_conns()
                 self.send_to_all(self.name + ' : ping')
 
@@ -83,13 +83,23 @@ class ClientConnection():
 
     def inp(self):
         global is_running
-        while is_running:
-            self.last_message = self.conn.recv(2048).decode('UTF-8')
-            if not self.last_message:
+        c = True # c stands for continue
+        while is_running and c:
+            try:
+                self.last_message = json.load(self.conn.recv(2048).decode('UTF-8'))
+                if(self.last_message['type'] == 'message'):
+                    self.send_to_all('message', self.name + ' : ' + self.last_message)
+                elif(self.last_message['type'] == 'credentials'):
+                    pass
+            except:
+                self.conn.close()
                 break
-            self.send_to_all(self.name + ' : ' + self.last_message)
+            if not self.last_message:
+                c = False
+                break
 
-    def outp(self, data):
+    def outp(self, type, message):
+        data = json.dump({type: message})
         self.conn.sendall(bytes(data, 'UTF-8'))
 
 serv = Server(host='127.0.0.1')

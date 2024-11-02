@@ -1,2 +1,3 @@
 # python-chat
-A simple chat, written in Python, using the socket library
+
+A simple P2P chat, written in Python, using the socket library
